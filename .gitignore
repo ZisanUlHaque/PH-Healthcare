@@ -33,6 +33,10 @@ yarn-error.log*
 # env files (can opt-in for committing if needed)
 .env
 
+# Block all local override files containing actual secrets
+*.local
+.env.*.local
+
 # vercel
 .vercel
 
