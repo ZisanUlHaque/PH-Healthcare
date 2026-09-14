@@ -3,7 +3,7 @@
 import { useForm } from "@tanstack/react-form";
 import { Input } from "../ui/input";
 import { Button } from "../ui/button";
-import { Field, FieldError, FieldGroup, FieldLabel } from "../ui/field";
+import { Field, FieldError, FieldGroup, FieldLabel, FieldSeparator } from "../ui/field";
 import { loginSchema } from "@/validation";
 import { useState } from "react";
 import { Eye, EyeClosed } from "lucide-react";
@@ -11,6 +11,7 @@ import { useLogin } from "@/hooks";
 import { toast } from "../ui/toast";
 import { useRouter } from "next/navigation";
 import { Spinner } from "../ui/spinner";
+import GoogleLoginComponent from "../modules/google-login/GoogleLogin";
 
 export default function LoginForm() {
   const [showPassword, setShowPassword] = useState(false);
@@ -139,6 +140,8 @@ const form = useForm({
           </Button>
         </FieldGroup>
       </form>
+      <FieldSeparator>Or Continue With</FieldSeparator>
+      <GoogleLoginComponent></GoogleLoginComponent>
     </div>
   );
 }
