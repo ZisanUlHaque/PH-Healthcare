@@ -3,7 +3,13 @@
 import { useForm } from "@tanstack/react-form";
 import { Input } from "../ui/input";
 import { Button } from "../ui/button";
-import { Field, FieldError, FieldGroup, FieldLabel, FieldSeparator } from "../ui/field";
+import {
+  Field,
+  FieldError,
+  FieldGroup,
+  FieldLabel,
+  FieldSeparator,
+} from "../ui/field";
 import { loginSchema } from "@/validation";
 import { useState } from "react";
 import { Eye, EyeClosed } from "lucide-react";
@@ -12,6 +18,7 @@ import { toast } from "../ui/toast";
 import { useRouter } from "next/navigation";
 import { Spinner } from "../ui/spinner";
 import GoogleLoginComponent from "../modules/google-login/GoogleLogin";
+import Link from "next/link";
 
 export default function LoginForm() {
   const [showPassword, setShowPassword] = useState(false);
@@ -19,7 +26,7 @@ export default function LoginForm() {
 
   const { mutate: login, isPending: loginPending } = useLogin();
 
-const form = useForm({
+  const form = useForm({
     defaultValues: {
       email: "superadmin@gmail.com",
       password: "Super@admin12345",
@@ -132,16 +139,29 @@ const form = useForm({
           </form.Field>
 
           <Button disabled={loginPending} type="submit">
-            {
-              loginPending ? <>
-              <Spinner></Spinner>
-              Submitting..</> : "Submit"
-            }
+            {loginPending ? (
+              <>
+                <Spinner></Spinner>
+                Submitting..
+              </>
+            ) : (
+              "Submit"
+            )}
           </Button>
         </FieldGroup>
       </form>
       <FieldSeparator>Or Continue With</FieldSeparator>
       <GoogleLoginComponent></GoogleLoginComponent>
+
+      <div className="text-center text-sm text-muted-foreground">
+        Don&apos;t have an account?{" "}
+        <Link
+          href="/register"
+          className="font-medium underline underline-offset-4 hover:text-primary"
+        >
+          Register
+        </Link>
+      </div>
     </div>
   );
 }
