@@ -86,6 +86,7 @@ export const doctorApplicationSchema = z.object({
           (file) =>
             isAcceptedFileSize(file.size) && isAcceptedFileType(file.type),
         ),
+        
       {
         message: `Each file must be a PDF, DOC, DOCX or an image file under ${MAX_FILE_SIZE}MB`,
       },
