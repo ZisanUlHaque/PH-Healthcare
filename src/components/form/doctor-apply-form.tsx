@@ -29,6 +29,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import {
+  doctorApplicationSchema,
   isAcceptedFileSize,
   isAcceptedFileType,
   MAX_ADDITIONAL_FILES,
@@ -38,6 +39,8 @@ import {
 import { formatFileSize } from "@/utils";
 import { DoctorApplicationData } from "@/types";
 import { useApplyAsDoctor } from "@/hooks";
+import { toast } from "../ui/toast";
+import { Spinner } from "../ui/spinner";
 
 //* Data signature
 // {
@@ -63,18 +66,36 @@ export default function DoctorApplyForm() {
 
   const form = useForm({
     defaultValues: {
-      name: "Mir Hussain",
-      email: "drmir@gmail.com",
+      name: "Mizan",
+      email: "drmir+409238@gmail.com",
       phone: "01912345678",
       address: "Neptune",
       specialization: "Cardiologist",
-      licenseNumber: "ABC123",
+      licenseNumber: "ABC12334957w3",
       qualifications: "MBBS",
       experienceYears: "50",
       consultationFee: "10000",
       bio: "My life, my rules.",
       resume: null as File | null,
       additionalFiles: [] as File[],
+    },
+    // defaultValues: {
+    //   name: "",
+    //   email: "",
+    //   phone: "",
+    //   address: "",
+    //   specialization: "",
+    //   licenseNumber: "",
+    //   qualifications: "",
+    //   experienceYears: "",
+    //   consultationFee: "",
+    //   bio: "",
+    //   resume: null as File | null,
+    //   additionalFiles: [] as File[],
+    // },
+
+    validators: {
+      onSubmit: doctorApplicationSchema,
     },
 
     onSubmit: async ({ value }) => {
@@ -105,7 +126,32 @@ export default function DoctorApplyForm() {
         },
         {
           onSuccess: (res) => {
-            console.log(res);
+            if (!res.success) {
+              toast.add({
+                title: "Server Failure",
+                description: "Something went wrong. Please try again",
+                type: "error",
+              });
+              return;
+            }
+
+            toast.add({
+              title: "Application Submitted",
+              description: "Please verify your account",
+              type: "success",
+            });
+            const params = new URLSearchParams({
+              email: doctorData.user.email,
+            });
+            router.push(`/apply/verify-account?${params.toString()}`);
+          },
+          onError: (err) => {
+            toast.add({
+              title: "Application failure",
+              description:
+                err.message || "Something went wrong. Please try again",
+              type: "error",
+            });
           },
         },
       );
@@ -481,15 +527,6 @@ export default function DoctorApplyForm() {
                       onChange={(e) => {
                         const selected = e.target.files?.[0] ?? null;
 
-                        if (
-                          selected &&
-                          (!isAcceptedFileSize(selected.size) ||
-                            !isAcceptedFileType(selected.type))
-                        ) {
-                          field.handleBlur();
-                          return;
-                        }
-
                         field.handleChange(selected);
                         e.target.value = "";
                       }}
@@ -533,7 +570,10 @@ export default function DoctorApplyForm() {
               return (
                 <Field data-invalid={isInvalid}>
                   <FieldLabel htmlFor="additional-file-field">
-                    Resume
+                    Additional Files
+                    <span className="font-normal text-muted-foreground">
+                      (optional)
+                    </span>
                   </FieldLabel>
                   <div className="flex flex-wrap items-center gap-3">
                     <Button
@@ -557,19 +597,8 @@ export default function DoctorApplyForm() {
                           return;
                         }
 
-                        const invalid = incoming.some(
-                          (file) =>
-                            !isAcceptedFileSize(file.size) ||
-                            !isAcceptedFileType(file.type),
-                        );
-
-                        if (invalid) {
-                          field.handleBlur();
-                          e.target.value = "";
-                          return;
-                        }
-
                         field.handleChange([...files, ...incoming]);
+                        e.target.value = "";
                       }}
                     />
                     {files.length > 0 && (
@@ -616,8 +645,14 @@ export default function DoctorApplyForm() {
           </form.Field>
         </FieldGroup>
         <div className="flex justify-end w-full mt-5">
-          <Button type="submit" size="lg">
-            Submit
+          <Button disabled={applyPending} type="submit">
+            {applyPending ? (
+              <>
+                <Spinner /> submitting
+              </>
+            ) : (
+              "Submit"
+            )}
           </Button>
         </div>
       </form>
