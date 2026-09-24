@@ -7,8 +7,10 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { useSuspenseMySchedules } from "@/hooks";
 
 import type { ScheduleParams } from "@/types";
+import ScheduleActions from "./schedule-actions";
 
 interface Props extends ScheduleParams {}
 
@@ -20,7 +22,9 @@ function formatDateTime(value: string) {
 }
 
 export default function ScheduleTable(params: Props) {
-  const schedules = [];
+  const { data } = useSuspenseMySchedules(params);
+
+  const schedules = data?.data || [];
 
   if (schedules.length === 0) {
     return (
@@ -69,7 +73,7 @@ export default function ScheduleTable(params: Props) {
                 </span>
               </TableCell>
               <TableCell className="text-right">
-                <Button>View</Button>
+                <ScheduleActions schedule={schedule} />
               </TableCell>
             </TableRow>
           ))}

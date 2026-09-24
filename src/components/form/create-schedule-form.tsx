@@ -6,17 +6,22 @@ import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
 import { Calendar } from "../ui/calendar";
 import { format } from "date-fns";
 import { toast } from "../ui/toast";
-import { scheduleSchema } from "@/validation";
 import { useCreateSchedule } from "@/hooks";
+import { scheduleSchema } from "@/validation";
+import { Spinner } from "../ui/spinner";
 
-export default function CreateScheduleForm() {
+export default function CreateScheduleForm({
+  handleClose,
+}: {
+  handleClose: () => void;
+}) {
   const { mutate: create, isPending } = useCreateSchedule();
 
   const form = useForm({
     defaultValues: {
       date: "",
-      startTime: "",
-      endTime: "",
+      startTime: "09:00", // 24-hour format (HH:mm)
+      endTime: "10:00",
       meetingLink: "https://meet.google.com/aiu-ctor-moh",
     },
     validators: {
@@ -30,8 +35,6 @@ export default function CreateScheduleForm() {
         endDateTime: new Date(`${value.date}T${value.endTime}`).toISOString(),
         meetingLink: value.meetingLink,
       };
-
-      console.log(scheduleValue);
 
       create(scheduleValue, {
         onSuccess: (res) => {
@@ -48,6 +51,7 @@ export default function CreateScheduleForm() {
             description: "Your schedule is saved as a draft",
             type: "success",
           });
+          handleClose();
         },
         onError: (err) => {
           toast.add({
@@ -56,6 +60,7 @@ export default function CreateScheduleForm() {
               err.message || "Something went wrong. Please try again",
             type: "error",
           });
+          handleClose();
         },
       });
     },
@@ -77,19 +82,18 @@ export default function CreateScheduleForm() {
               ? new Date(`${field.state.value}T00:00:00`)
               : undefined;
 
-            console.log({ selected });
-
             return (
               <Field data-invalid={isInvalid}>
                 <FieldLabel htmlFor={field.name}>Date</FieldLabel>
                 <Popover>
                   <PopoverTrigger render={<Button variant="outline" />}>
-                    Select Date
+                    {selected ? `${format(selected, "PPP")}` : "Select Date"}
                   </PopoverTrigger>
-                  <PopoverContent>
+                  <PopoverContent className="w-auto p-0">
                     <Calendar
                       mode="single"
                       selected={selected}
+                      disabled={{ before: new Date() }}
                       onSelect={(date) => {
                         if (date) {
                           field.handleChange(format(date, "yyyy-MM-dd"));
@@ -121,8 +125,9 @@ export default function CreateScheduleForm() {
                     value={field.state.value}
                     onChange={(e) => field.handleChange(e.target.value)}
                     onBlur={field.handleBlur}
-                    className="appearance-none bg-background [&::-webkit-calendar-picker-indicator]:hidden [&::-webkit-calendar-picker-indicator]:appearance-none"
+                    className="appearance-none bg-background"
                   />
+
                   {isInvalid && <FieldError errors={field.state.meta.errors} />}
                 </Field>
               );
@@ -143,8 +148,9 @@ export default function CreateScheduleForm() {
                     value={field.state.value}
                     onChange={(e) => field.handleChange(e.target.value)}
                     onBlur={field.handleBlur}
-                    className="appearance-none bg-background [&::-webkit-calendar-picker-indicator]:hidden [&::-webkit-calendar-picker-indicator]:appearance-none"
+                    className="appearance-none bg-background"
                   />
+
                   {isInvalid && <FieldError errors={field.state.meta.errors} />}
                 </Field>
               );
@@ -174,7 +180,15 @@ export default function CreateScheduleForm() {
           }}
         </form.Field>
 
-        <Button type="submit">"Submit"</Button>
+        <Button type="submit" disabled={isPending}>
+          {isPending ? (
+            <>
+              <Spinner /> Submitting
+            </>
+          ) : (
+            "Submit"
+          )}
+        </Button>
       </FieldGroup>
     </form>
   );

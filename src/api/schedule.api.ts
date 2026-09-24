@@ -18,3 +18,16 @@ export function getMySchedules(params: ScheduleParams) {
     params,
   });
 }
+
+export function publishSchedule(scheduleId: string) {
+  return apiClient<ApiResponse<Schedule>>(
+    `/schedule/publish-schedule/${scheduleId}`,
+    { method: "PATCH" },
+  );
+}
+
+export function deleteSchedule(scheduleId: string) {
+  return apiClient<ApiResponse<Schedule>>(`/schedule/${scheduleId}`, {
+    method: "DELETE",
+  });
+}
