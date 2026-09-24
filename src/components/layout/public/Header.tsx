@@ -11,6 +11,7 @@ import Link from "next/link";
 export default function Header() {
   const routes = [
     { name: "Home", url: "/" },
+    { name: "Doctor", url: "/doctors" },
     { name: "About us", url: "/about-us" },
   ];
 

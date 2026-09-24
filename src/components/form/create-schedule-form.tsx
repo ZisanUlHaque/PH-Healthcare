@@ -20,8 +20,8 @@ export default function CreateScheduleForm({
   const form = useForm({
     defaultValues: {
       date: "",
-      startTime: "09:00", // 24-hour format (HH:mm)
-      endTime: "10:00",
+      startTime: "", // 24-hour format (HH:mm)
+      endTime: "",
       meetingLink: "https://meet.google.com/aiu-ctor-moh",
     },
     validators: {
