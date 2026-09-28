@@ -19,26 +19,19 @@ import {
 import Link from "next/link";
 
 export async function generateStaticParams() {
-  try {
-    const limit = 100;
-    const first = await getAllPublicDoctors({ page: 1, limit });
+  const limit = 100;
+  const first = await getAllPublicDoctors({ page: 1, limit });
 
-    const totalPages = first?.meta?.totalPages ?? 1;
-    const all = [...(first?.data ?? [])];
+  const totalPages = first.meta.totalPages ?? 1;
 
-    for (let page = 2; page <= totalPages; page++) {
-      const data = await getAllPublicDoctors({ page, limit });
-      all.push(...(data?.data ?? []));
-    }
+  const all = [...first.data];
 
-    const ids = all
-      .map((doctor) => String(doctor.id))
-      .filter(Boolean);
-
-    return ids.length > 0 ? ids.map((id) => ({ id })) : [{ id: "fallback" }];
-  } catch {
-    return [{ id: "fallback" }];
+  for (let page = 2; page <= totalPages; page++) {
+    const data = await getAllPublicDoctors({ page, limit });
+    all.push(...data.data);
   }
+
+  return all.map((doctor) => ({ id: doctor.id }));
 }
 
 export default async function page({
@@ -48,14 +41,9 @@ export default async function page({
 }) {
   const { id } = await params;
 
-  let doctor;
+  const data = await getPublicDoctorProfile(id);
 
-  try {
-    const data = await getPublicDoctorProfile(id);
-    doctor = data?.data || undefined;
-  } catch {
-    doctor = undefined;
-  }
+  const doctor = data.data || undefined;
 
   if (!doctor) {
     return (
