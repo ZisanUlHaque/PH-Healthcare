@@ -13,12 +13,13 @@ import {
 import { loginSchema } from "@/validation";
 import { useState } from "react";
 import { Eye, EyeClosed } from "lucide-react";
-import { useLogin } from "@/hooks";
-import { toast } from "../ui/toast";
+import { useGoogleOAuth, useLogin } from "@/hooks";
 import { useRouter } from "next/navigation";
+import { toast } from "../ui/toast";
 import { Spinner } from "../ui/spinner";
-import GoogleLoginComponent from "../modules/google-login/GoogleLogin";
+import { GoogleLogin } from "@react-oauth/google";
 import Link from "next/link";
+import GoogleLoginComponent from "../modules/google-login/GoogleLogin";
 
 export default function LoginForm() {
   const [showPassword, setShowPassword] = useState(false);
@@ -28,9 +29,13 @@ export default function LoginForm() {
 
   const form = useForm({
     defaultValues: {
-      email: "superadmin@gmail.com",
-      password: "Super@admin12345",
+      email: "mirhussain@gmail.com",
+      password: "@Doctor123456",
     },
+    // defaultValues: {
+    //   email: "superadmin@gmail.com",
+    //   password: "Super@admin12345",
+    // },
     validators: {
       onSubmit: loginSchema,
     },
@@ -60,6 +65,7 @@ export default function LoginForm() {
       });
     },
   });
+
   return (
     <div className="flex flex-col gap-5">
       <div className="flex flex-col items-center gap-2 text-center">
@@ -141,8 +147,7 @@ export default function LoginForm() {
           <Button disabled={loginPending} type="submit">
             {loginPending ? (
               <>
-                <Spinner></Spinner>
-                Submitting..
+                <Spinner /> submitting
               </>
             ) : (
               "Submit"
@@ -150,8 +155,10 @@ export default function LoginForm() {
           </Button>
         </FieldGroup>
       </form>
-      <FieldSeparator>Or Continue With</FieldSeparator>
-      <GoogleLoginComponent></GoogleLoginComponent>
+
+      <FieldSeparator>Or continue with</FieldSeparator>
+
+      <GoogleLoginComponent />
 
       <div className="text-center text-sm text-muted-foreground">
         Don&apos;t have an account?{" "}

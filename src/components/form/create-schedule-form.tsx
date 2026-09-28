@@ -6,7 +6,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
 import { Calendar } from "../ui/calendar";
 import { format } from "date-fns";
 import { toast } from "../ui/toast";
-import { useCreateSchedule } from "@/hooks";
+import { useCreateSchedule, usePublishSchedule } from "@/hooks";
 import { scheduleSchema } from "@/validation";
 import { Spinner } from "../ui/spinner";
 
@@ -16,6 +16,7 @@ export default function CreateScheduleForm({
   handleClose: () => void;
 }) {
   const { mutate: create, isPending } = useCreateSchedule();
+  const { mutate: publish } = usePublishSchedule();
 
   const form = useForm({
     defaultValues: {
@@ -38,7 +39,7 @@ export default function CreateScheduleForm({
 
       create(scheduleValue, {
         onSuccess: (res) => {
-          if (!res.success) {
+          if (!res.success || !res.data?.id) {
             toast.add({
               title: "Server Failure",
               description: "Something went wrong. Please try again",
@@ -46,12 +47,37 @@ export default function CreateScheduleForm({
             });
             return;
           }
-          toast.add({
-            title: "Schedule Created",
-            description: "Your schedule is saved as a draft",
-            type: "success",
+
+          publish(res.data.id, {
+            onSuccess: (publishRes) => {
+              if (!publishRes.success) {
+                toast.add({
+                  title: "Schedule created",
+                  description: "Your slot was saved, but it is not visible yet.",
+                  type: "warning",
+                });
+                handleClose();
+                return;
+              }
+
+              toast.add({
+                title: "Schedule Created",
+                description: "Your slot is now live for patients to book.",
+                type: "success",
+              });
+              handleClose();
+            },
+            onError: (err) => {
+              toast.add({
+                title: "Schedule created",
+                description:
+                  err.message ||
+                  "Your slot was saved but could not be published.",
+                type: "warning",
+              });
+              handleClose();
+            },
           });
-          handleClose();
         },
         onError: (err) => {
           toast.add({
